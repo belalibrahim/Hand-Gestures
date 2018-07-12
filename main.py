@@ -16,7 +16,7 @@ while cam.isOpened():
 
     grey = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(grey, (35, 35), 0)
-    _, thresh1 = cv2.threshold(blur, 70, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    _, thresh1 = cv2.threshold(blur, 170, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     _, contours, _ = cv2.findContours(thresh1.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     count_defects = -1
