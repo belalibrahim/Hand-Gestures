@@ -30,6 +30,9 @@ while cam.isOpened():
 
         if recording:
             gesture = np.append(gesture, cnt)
+            cv2.putText(frame, "Capturing", (50, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+        else:
+            cv2.putText(frame, "Press 'c' to capture a gesture", (50, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv2.LINE_AA)
 
         x, y, w, h = cv2.boundingRect(cnt)
         cv2.rectangle(roi, (x, y), (x + w, y + h), (0, 0, 255), 0)

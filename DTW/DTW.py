@@ -36,7 +36,6 @@ class DTWRecognizer:
         self.templates.append(Template(name, points))
 
     def Recognize(self, points):
-        print(self.templates)
         points = resample(points, NumPoints)
         points = rotate_to_zero(points)
         points = scale_to_square(points, SquareSize)
