@@ -20,11 +20,11 @@ class Unistroke:
 
 # 1DollarRecognizer class
 class DollarRecognizer:
-    def __int__(self):  # constructor
+    def __init__(self):  # constructor
         self.Unistrokes = []
 
     # The 1$ Gesture Recognizer API begins here
-    def Recognize(self, points, useProtractor):
+    def Recognize(self, points, useProtractor=False):
         points = Resample(points, NumPoints)
         radians = IndicativeAngle(points)
         points = RotateBy(points, -radians)

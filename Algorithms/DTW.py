@@ -1,26 +1,19 @@
-from math import sin, cos, atan2, sqrt
+from Algorithms.Shared.Utils import *
+from Algorithms.Shared.Result import *
 
 NumPoints = 64
-SquareSize = 250.0
 AngleRange = 45.0
 AnglePrecision = 2.0
-Phi = 0.5 * (-1.0 + sqrt(5.0))
 
 
 class Template:
     def __init__(self, name, points):
-        self.points = points
+        self.Points = points
         self.name = name
-        self.points = resample(self.points, NumPoints)
-        self.points = rotate_to_zero(self.points)
-        self.points = scale_to_square(self.points, SquareSize)
-        self.points = translate_to_origin(self.points)
-
-
-class Result:
-    def __init__(self, name, score):
-        self.Name = name
-        self.Score = score
+        self.Points = Resample(self.Points, NumPoints)
+        self.Points = rotate_to_zero(self.Points)
+        self.Points = ScaleTo(self.Points, SquareSize)
+        self.Points = translate_to_origin(self.Points)
 
 
 class DTWRecognizer:
@@ -36,130 +29,40 @@ class DTWRecognizer:
         self.templates.append(Template(name, points))
 
     def Recognize(self, points):
-        points = resample(points, NumPoints)
+        points = Resample(points, NumPoints)
         points = rotate_to_zero(points)
-        points = scale_to_square(points, SquareSize)
+        points = ScaleTo(points, SquareSize)
         points = translate_to_origin(points)
 
         b = float("inf")
         t = None
 
         for i, temp in enumerate(self.templates):
-            Tpoints = temp.points
-            d = distance_at_best_angle(points, Tpoints, -AngleRange, AngleRange, AnglePrecision)
+            Tpoints = temp
+            d = DistanceAtBestAngle(points, Tpoints, -AngleRange, AngleRange, AnglePrecision)
             if d < b:
                 b = d
                 t = temp
 
-        score = 1 - (b / (0.5 * sqrt(SquareSize * SquareSize * 2)))
+        score = 1 - (b / HalfDiagonal)
 
         if t:
             return Result(t.name, score)
         else:
-            return Result('Unrecognized', 0.0)
-
-def average(xs): return sum(xs) / len(xs)
-
-
-def resample(points, n):
-    I = pathlength(points) / float(n-1)
-    D = 0
-    newPoints = [points[0]]
-    i = 1
-    while i<len(points):
-        p_i = points[i]
-        d = distance(points[i-1], p_i)
-        if (D + d) >= I:
-            qx = points[i-1][0] + ((I-D) / d) * (p_i[0] - points[i-1][0])
-            qy = points[i-1][1] + ((I-D) / d) * (p_i[1] - points[i-1][1])
-            newPoints.append([qx,qy])
-            points.insert(i, [qx,qy])
-            D = 0
-        else: D = D + d
-        i+=1
-    return newPoints
-
-
-def pathlength(points):
-    d = 0
-    for i,p_i in enumerate(points[:len(points)-1]):
-        d += distance(p_i, points[i+1])
-    return d
-
-
-def distance(p1, p2): return float(sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2))
-
-
-def centroid(points): return float(average([float(i[0]) for i in points])), float(average([float(i[1]) for i in points]))
+            return Result("Unrecognized.", 0.0)
 
 
 def rotate_to_zero(points):
-    cx, cy = centroid(points)
-    theta = atan2(cy - points[0][1], cx - points[0][0])
-    newPoints = rotate_by(points, -theta)
-    return newPoints
-
-
-def rotate_by(points, theta):
-    cx, cy = centroid(points)
-    newpoints = []
-    cos_p, sin_p = cos(theta), sin(theta)
-    for p in points:
-        qx = (p[0] - cx) * cos_p - (p[1] - cy) * sin_p + cx
-        qy = (p[0] - cx) * sin_p + (p[1] - cy) * cos_p + cy
-        newpoints.append([qx,qy])
-    return newpoints
-
-
-def bounding_box(points):
-    minx, maxx = min((p[0] for p in points)), max((p[0] for p in points))
-    miny, maxy = min((p[1] for p in points)), max((p[1] for p in points))
-    return minx, miny, maxx-minx, maxy - miny
-
-
-def scale_to_square(points, size):
-    min_x, min_y, w, h = bounding_box(points)
-    newPoints = []
-    for p in points:
-        qx = p[0] * (float(size) / w )
-        qy = p[1] * (float(size) / h )
-        newPoints.append([qx,qy])
+    c = Centroid(points)
+    theta = math.atan2(c.Y - points[0].Y, c.X - points[0].X)
+    newPoints = RotateBy(points, -theta)
     return newPoints
 
 
 def translate_to_origin(points):
-    cx, cy = centroid(points)
+    c = Centroid(points)
     newpoints = []
     for p in points:
-        qx, qy = p[0] - cx , p[1] - cy
-        newpoints.append([qx,qy])
+        qx, qy = p.X - c.X, p.Y - c.Y
+        newpoints.append(Point(qx, qy))
     return newpoints
-
-def distance_at_best_angle(points, T, ta, tb, td):
-    x1 = Phi * ta + (1 - Phi) * tb
-    f1 = distance_at_angle(points, T, x1)
-    x2 = (1 - Phi) * ta + Phi * tb
-    f2 = distance_at_angle(points, T, x2)
-    while abs(tb - ta) > td:
-        if f1 < f2:
-            tb,x2,f2 = x2, x1, f1
-            x1 = Phi * ta + (1 - Phi) * tb
-            f1 = distance_at_angle(points, T, x1)
-        else:
-            ta,x1,f1 = x1, x2, f2
-            x2 = (1 - Phi) * ta + Phi * tb
-            f2 = distance_at_angle(points, T, x2)
-    return min(f1, f2)
-
-
-def distance_at_angle(points, T, theta):
-    newpoints = rotate_by(points, theta)
-    d = pathdistance(newpoints, T)
-    return d
-
-
-def pathdistance(a,b):
-    d = 0
-    for ai, bi in zip(a,b):
-        d += distance(ai, bi)
-    return d / len(a)

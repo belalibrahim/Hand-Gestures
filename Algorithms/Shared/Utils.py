@@ -134,7 +134,10 @@ def Centroid(points):
 
 
 def BoundingBox(points):
-    minX = +math.inf, maxX = -math.inf, minY = +math.inf, maxY = -math.inf
+    minX = +math.inf
+    maxX = -math.inf
+    minY = +math.inf
+    maxY = -math.inf
 
     for i in range(0, len(points)):
         minX = min(minX, points[i].X)
@@ -147,10 +150,10 @@ def BoundingBox(points):
 
 def PathDistance(pts1, pts2):   # average distance between corresponding points in two paths
     d = 0.0
-    for i in range(len(pts1)):   # assumes pts1.length == pts2.length
+    for i in range(min(len(pts1), len(pts2))):   # assumes pts1.length == pts2.length
         d += Distance(pts1[i], pts2[i])
 
-    return d / len(pts1)
+    return d / max(len(pts1), len(pts2))
 
 
 def PathLength(points):     # length traversed by a point path

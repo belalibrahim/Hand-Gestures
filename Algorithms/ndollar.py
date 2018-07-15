@@ -45,7 +45,7 @@ class Multistroke:
 
 # NDollarRecognizer class
 class NDollarRecognizer:
-    def __int__(self, useBoundedRotationInvariance=False):
+    def __init__(self, useBoundedRotationInvariance=False):
         # one predefined multistroke for each multistroke type
         self.Multistrokes = []
         self.Multistrokes.append(Multistroke("T", useBoundedRotationInvariance, [
