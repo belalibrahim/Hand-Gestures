@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
-import math
-from DTW.DTW import *
+from Algorithms.DTW import *
+from Algorithms.dollar import *
+from Algorithms.ndollar import *
 
 recording = False
 cam = cv2.VideoCapture(0)
