@@ -1,6 +1,6 @@
-import math
-
 import cv2
+import math
+import numpy as np
 
 
 def get_roi(frame, x, y, width):
@@ -30,11 +30,32 @@ def get_angle(start, end, far):
     return math.acos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c))
 
 
-def centroid(contour):
+def get_centroid(contour):
     moments = cv2.moments(contour)
     if moments['m00'] != 0:
         cx = int(moments['m10'] / moments['m00'])
         cy = int(moments['m01'] / moments['m00'])
-        return tuple(cx, cy)
+        return cx, cy
+    else:
+        return None
+
+
+def get_farthest_point(defects, contour, centroid):
+    s = defects[:, 0][:, 0]
+    cx, cy = centroid
+
+    x = np.array(contour[s][:, 0][:, 0], dtype=np.float)
+    y = np.array(contour[s][:, 0][:, 1], dtype=np.float)
+
+    xp = cv2.pow(cv2.subtract(x, cx), 2)
+    yp = cv2.pow(cv2.subtract(y, cy), 2)
+    dist = cv2.sqrt(cv2.add(xp, yp))
+
+    dist_max_i = np.argmax(dist)
+
+    if dist_max_i < len(s):
+        farthest_defect = s[dist_max_i]
+        farthest_point = tuple(contour[farthest_defect][0])
+        return farthest_point
     else:
         return None

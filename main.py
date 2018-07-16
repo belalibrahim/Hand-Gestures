@@ -7,9 +7,10 @@ from Algorithms.ndollar import *
 
 recording = False
 cam = cv2.VideoCapture(0)
-recognizer = DTWRecognizer()
+dtw = DTWRecognizer()
 x0, y0, width = 50, 100, 300
-gesture = np.array([], np.int32)
+points = np.array([], np.int32)
+gesture = []
 
 while cam.isOpened():
 
@@ -26,7 +27,6 @@ while cam.isOpened():
         cnt = max(contours, key=lambda x: cv2.contourArea(x))
 
         if recording:
-            gesture = np.append(gesture, cnt)
             cv2.putText(frame, "Capturing", (50, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
         else:
             cv2.putText(frame, "Press 'c' to capture a gesture", (50, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv2.LINE_AA)
@@ -52,6 +52,21 @@ while cam.isOpened():
                 if angle <= math.pi / 2:
                     count_defects += 1
                     cv2.line(roi, start, end, [0, 255, 0], 2)
+
+            if recording:
+                if count_defects == 0:
+                    centroid = get_centroid(cnt)
+                    if centroid:
+                        farthest_point = get_farthest_point(defects, cnt, centroid)
+                        if farthest_point:
+                            gesture.append(Point(farthest_point[0], farthest_point[1]))
+                            points = np.append(points, farthest_point)
+                            points = points.reshape(-1, 1, 2)
+                            cv2.circle(roi, farthest_point, 15, [255, 0, 0], 5)
+                cv2.polylines(roi, [points], False, [0, 0, 255], 5)
+            else:
+                gesture = []
+                points = np.array([], np.int32)
     except:
         pass
 
@@ -72,9 +87,8 @@ while cam.isOpened():
     elif k == ord('r'):
         if recording:
             recording = False
-            gesture = gesture.reshape(-1, 2, 1)
             print(count_defects+1)
-            recognizer.add_template(count_defects+1, list(gesture))
+            dtw.add_template(count_defects + 1, gesture)
             print("Stopped")
         else:
             recording = True
@@ -83,8 +97,7 @@ while cam.isOpened():
     elif k == ord('c'):
         if recording:
             recording = False
-            gesture = gesture.reshape(-1, 2, 1)
-            result = recognizer.Recognize(list(gesture))
+            result = dtw.Recognize(gesture)
             print(result.Name)
             print(result.Score)
             print("Stopped")
