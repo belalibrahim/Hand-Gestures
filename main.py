@@ -9,6 +9,7 @@ recording = False
 cam = cv2.VideoCapture(0)
 dtw = DTWRecognizer()
 dollar = DollarRecognizer()
+ndollar = NDollarRecognizer()
 x0, y0, width = 250, 50, 330
 points = np.array([], np.int32)
 gesture = []
@@ -100,8 +101,10 @@ while cam.isOpened():
             recording = False
             dtw_result = dtw.Recognize(gesture)
             dollar_result = dollar.Recognize(gesture)
+            ndollar_result = ndollar.Recognize([gesture])
             print("Algorithm: DTW | Gesture: " + dtw_result.Name + ", Score: " + str(dtw_result.Score))
             print("Algorithm: 1$. | Gesture: " + dollar_result.Name + ", Score: " + str(dollar_result.Score))
+            print("Algorithm: N$. | Gesture: " + ndollar_result.Name + ", Score: " + str(ndollar_result.Score))
             print("Stopped")
         else:
             recording = True
