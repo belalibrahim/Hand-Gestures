@@ -8,7 +8,7 @@ from Algorithms.ndollar import *
 recording = False
 cam = cv2.VideoCapture(0)
 dtw = DTWRecognizer()
-x0, y0, width = 50, 100, 300
+x0, y0, width = 50, 50, 330
 points = np.array([], np.int32)
 gesture = []
 
@@ -39,7 +39,6 @@ while cam.isOpened():
         cv2.drawContours(drawing, [cnt], 0, (0, 255, 0), 1)
         cv2.drawContours(drawing, [hull], 0, (0, 0, 255), 1)
 
-        cnt = cv2.approxPolyDP(cnt, 0.01 * cv2.arcLength(cnt, True), True)
         hull = cv2.convexHull(cnt, returnPoints=False)
         defects = cv2.convexityDefects(cnt, hull)
 
@@ -75,6 +74,7 @@ while cam.isOpened():
     else:
         if recording:
             recording = False
+            print("Stopped")
         cv2.putText(frame, "0", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2, cv2.LINE_AA)
 
     cv2.imshow('Camera', frame)
