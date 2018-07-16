@@ -22,7 +22,8 @@ def Resample(points, n):
     I = PathLength(points) / (n - 1)    # interval length
     D = 0.0
     newpoints = [points[0]]
-    for i in range(1, len(points)):
+    i = 1
+    while i < len(points):
         d = Distance(points[i-1], points[i])
         if (D + d) >= I:
             qx = points[i-1].X + ((I - D) / d) * (points[i].X - points[i-1].X)
@@ -33,6 +34,7 @@ def Resample(points, n):
             D = 0.0
         else:
             D += d
+        i += 1
 
     if len(newpoints) == n - 1:     # sometimes we fall a rounding-error short of adding the last point, so add it if so
         newpoints.append(Point(points[-1].X, points[-1].Y))

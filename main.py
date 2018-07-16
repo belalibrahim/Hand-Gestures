@@ -8,7 +8,8 @@ from Algorithms.ndollar import *
 recording = False
 cam = cv2.VideoCapture(0)
 dtw = DTWRecognizer()
-x0, y0, width = 50, 50, 330
+dollar = DollarRecognizer()
+x0, y0, width = 250, 50, 330
 points = np.array([], np.int32)
 gesture = []
 
@@ -97,9 +98,10 @@ while cam.isOpened():
     elif k == ord('c'):
         if recording:
             recording = False
-            result = dtw.Recognize(gesture)
-            print(result.Name)
-            print(result.Score)
+            dtw_result = dtw.Recognize(gesture)
+            dollar_result = dollar.Recognize(gesture)
+            print("Algorithm: DTW | Gesture: " + dtw_result.Name + ", Score: " + str(dtw_result.Score))
+            print("Algorithm: 1$. | Gesture: " + dollar_result.Name + ", Score: " + str(dollar_result.Score))
             print("Stopped")
         else:
             recording = True
